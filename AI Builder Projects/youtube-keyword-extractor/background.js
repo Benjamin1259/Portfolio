@@ -267,6 +267,40 @@ function truncate(text, maxChars = MAX_TRANSCRIPT_CHARS) {
   return text.length > maxChars ? text.slice(0, maxChars) + " …[truncated]" : text;
 }
 
+// Extraction results are cached per video ID in chrome.storage.local. A
+// video's transcript doesn't change, so there's no reason a re-visit (a
+// hard refresh, reopening a tab, watching it again another day) should
+// re-spend a Gemini call on identical content — this was the single
+// biggest driver of daily request volume during heavy testing, since every
+// reload was an uncached, from-scratch call for the same video.
+const CACHE_KEY_PREFIX = "ytk_cache_";
+const MAX_CACHE_ENTRIES = 200;
+
+async function getCachedExtraction(videoId) {
+  if (!videoId) return null;
+  const key = CACHE_KEY_PREFIX + videoId;
+  const result = await chrome.storage.local.get(key);
+  return result[key] || null;
+}
+
+async function setCachedExtraction(videoId, data) {
+  if (!videoId) return;
+  const key = CACHE_KEY_PREFIX + videoId;
+  await chrome.storage.local.set({ [key]: { ...data, cachedAt: Date.now() } });
+  await pruneCacheIfNeeded();
+}
+
+// Simple bound on storage growth: once over the cap, drop the
+// least-recently-cached entries first.
+async function pruneCacheIfNeeded() {
+  const all = await chrome.storage.local.get(null);
+  const entries = Object.entries(all).filter(([k]) => k.startsWith(CACHE_KEY_PREFIX));
+  if (entries.length <= MAX_CACHE_ENTRIES) return;
+  entries.sort((a, b) => (a[1]?.cachedAt || 0) - (b[1]?.cachedAt || 0));
+  const toRemove = entries.slice(0, entries.length - MAX_CACHE_ENTRIES).map(([k]) => k);
+  if (toRemove.length) await chrome.storage.local.remove(toRemove);
+}
+
 async function extractKeywordsAndWords(transcript, videoTitle) {
   const prompt = `You are helping a viewer study a YouTube video.
 
@@ -327,8 +361,15 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
           break;
         }
         case "EXTRACT_KEYWORDS": {
+          const cached = await getCachedExtraction(message.videoId);
+          if (cached) {
+            debugLog(`✓ cache hit for ${message.videoId} — skipping Gemini call`);
+            sendResponse({ ok: true, keywords: cached.keywords, words: cached.words, fromCache: true });
+            break;
+          }
           const { keywords, words } = await extractKeywordsAndWords(message.transcript, message.videoTitle);
-          sendResponse({ ok: true, keywords, words });
+          await setCachedExtraction(message.videoId, { keywords, words });
+          sendResponse({ ok: true, keywords, words, fromCache: false });
           break;
         }
         case "EXPLAIN_KEYWORD": {

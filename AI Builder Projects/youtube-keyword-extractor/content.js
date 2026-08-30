@@ -778,6 +778,7 @@ async function doRun(runId, videoId) {
 
     const keywordsRes = await sendMessage({
       type: "EXTRACT_KEYWORDS",
+      videoId: state.videoId,
       transcript: state.transcript,
       videoTitle: state.videoTitle,
     });
