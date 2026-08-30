@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        width: 260px;
+        font: 13px/1.5 -apple-system, "Segoe UI", Arial, sans-serif;
+        margin: 0;
+        padding: 14px;
+        color: #1f1f1f;
+      }
+      h2 {
+        font-size: 14px;
+        margin: 0 0 8px;
+      }
+      p {
+        margin: 0 0 10px;
+        color: #444;
+      }
+      button {
+        width: 100%;
+        background: #065fd4;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      #status {
+        margin-top: 8px;
+        font-size: 12px;
+      }
+      .ok {
+        color: #1a7f37;
+      }
+      .warn {
+        color: #b3261e;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Transcript Keywords</h2>
+    <p>Open a YouTube video, then click the "🔑 Keywords" button that appears on the page to see the sidebar.</p>
+    <div id="status">Checking API key…</div>
+    <button id="openOptions">Open settings</button>
+    <script src="popup.js"></script>
+  </body>
+</html>
