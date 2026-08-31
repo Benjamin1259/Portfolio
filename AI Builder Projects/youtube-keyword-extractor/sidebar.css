@@ -135,6 +135,22 @@
   cursor: pointer;
 }
 
+.ytk-cta-btn {
+  margin-top: 10px;
+  background: #3ea6ff;
+  color: #0f0f0f;
+  border: none;
+  border-radius: 18px;
+  padding: 10px 20px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ytk-cta-btn:hover {
+  background: #63b6ff;
+}
+
 .ytk-group-header {
   font-size: 15px;
   font-weight: 800;

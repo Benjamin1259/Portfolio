@@ -327,9 +327,27 @@ function render() {
   }
 }
 
+// Shown on all three tabs while waiting for the user to opt in — nothing
+// (not the transcript extraction, not the Gemini call) happens until this
+// is clicked, regardless of which tab they're looking at.
+function renderGetInsightsPrompt(body) {
+  body.innerHTML = `
+    <p class="ytk-muted">Ready to analyze this video.</p>
+    <button id="ytk-get-insights" class="ytk-cta-btn">Get Video Insights</button>
+  `;
+  body.querySelector("#ytk-get-insights").addEventListener("click", () => {
+    state.onRequestInsights?.();
+  });
+}
+
 function renderConceptsTab(body) {
   if (state.status === "idle") {
     body.innerHTML = `<p class="ytk-muted">Open a video to extract keywords.</p>`;
+    return;
+  }
+
+  if (state.status === "not-started") {
+    renderGetInsightsPrompt(body);
     return;
   }
 
@@ -348,7 +366,10 @@ function renderConceptsTab(body) {
       <p class="ytk-error">${escapeHtml(state.error)}</p>
       <button id="ytk-retry" class="ytk-retry-btn">Retry</button>
     `;
-    body.querySelector("#ytk-retry").addEventListener("click", () => run(true));
+    body.querySelector("#ytk-retry").addEventListener("click", () => {
+      const retryRunId = state.runId;
+      runInsightsPipeline(() => isRunStale(retryRunId));
+    });
     return;
   }
 
@@ -381,6 +402,11 @@ function renderWordsTab(body) {
     return;
   }
 
+  if (state.status === "not-started") {
+    renderGetInsightsPrompt(body);
+    return;
+  }
+
   if (state.status === "loading-transcript") {
     body.innerHTML = `<p class="ytk-muted">Reading the transcript…</p>`;
     return;
@@ -396,7 +422,10 @@ function renderWordsTab(body) {
       <p class="ytk-error">${escapeHtml(state.error)}</p>
       <button id="ytk-retry" class="ytk-retry-btn">Retry</button>
     `;
-    body.querySelector("#ytk-retry").addEventListener("click", () => run(true));
+    body.querySelector("#ytk-retry").addEventListener("click", () => {
+      const retryRunId = state.runId;
+      runInsightsPipeline(() => isRunStale(retryRunId));
+    });
     return;
   }
 
@@ -486,7 +515,15 @@ async function runSearch(query) {
 function renderSearchTab(body) {
   const search = state.search || { query: "", status: "idle", summary: null, matches: null, error: null };
 
-  if (state.status === "idle" || state.status === "loading-transcript" || state.status === "loading-keywords") {
+  if (state.status === "idle") {
+    body.innerHTML = `<p class="ytk-muted">Open a video to search it.</p>`;
+    return;
+  }
+  if (state.status === "not-started") {
+    renderGetInsightsPrompt(body);
+    return;
+  }
+  if (state.status === "loading-transcript" || state.status === "loading-keywords") {
     body.innerHTML = `<p class="ytk-muted">Waiting for the transcript to finish loading…</p>`;
     return;
   }
@@ -696,25 +733,29 @@ function queueDomWork(fn) {
   return result;
 }
 
-function run(force = false) {
+function run() {
   const videoId = currentVideoId();
   if (!videoId) return;
   // "yt-navigate-finish" fires on more than just actual video changes (and
   // our own transcript-panel click/close may itself trigger it) — without
   // this guard, a spurious re-fire for the SAME video restarts the whole
-  // pipeline and burns another Gemini call for no reason. The explicit
-  // Retry button still needs to work for the current video, hence `force`.
-  if (!force && videoId === state.videoId) {
+  // pipeline (resetting back to "not-started", discarding whatever the user
+  // already had) for no reason.
+  if (videoId === state.videoId) {
     debugLog(`run() SKIPPED — already on ${videoId}`);
     return;
   }
-  debugLog(`run() STARTING for ${videoId}${force ? " (forced)" : ""} — was on ${state.videoId}`);
+  debugLog(`run() STARTING for ${videoId} — was on ${state.videoId}`);
   const runId = ++currentRunId;
   doRun(runId, videoId).catch((err) => console.error("[ytk]", err));
 }
 
+function isRunStale(runId) {
+  return runId !== currentRunId;
+}
+
 async function doRun(runId, videoId) {
-  const isStale = () => runId !== currentRunId;
+  const isStale = () => isRunStale(runId);
   if (isStale()) return; // superseded before its turn even came up
 
   state = {
@@ -724,13 +765,32 @@ async function doRun(runId, videoId) {
     segments: null,
     keywords: null,
     words: null,
-    status: "loading-transcript",
+    status: "not-started",
     error: null,
     search: null,
+    runId,
+    onRequestInsights: null,
   };
   currentSearchRunId++; // invalidate any in-flight search from the previous video
   ensureUI();
   showUI();
+
+  // Nothing that costs anything (transcript extraction — which visibly
+  // manipulates YouTube's own transcript panel — or the Gemini call) runs
+  // until the user opts in via the "Get Insights" button, on whichever tab
+  // they happen to be looking at.
+  await new Promise((resolve) => {
+    state.onRequestInsights = resolve;
+    render();
+  });
+  state.onRequestInsights = null;
+  if (isStale()) return;
+
+  await runInsightsPipeline(isStale);
+}
+
+async function runInsightsPipeline(isStale) {
+  state.status = "loading-transcript";
   render();
 
   // Anything unexpected below (a rejected sendMessage — e.g. the background
@@ -831,6 +891,8 @@ function leaveVideo() {
     status: "idle",
     error: null,
     search: null,
+    runId: null,
+    onRequestInsights: null,
   };
   hideUI();
 }
