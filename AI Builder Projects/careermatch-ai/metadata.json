@@ -1,0 +1,5 @@
+{
+  "name": "CareerMatch AI",
+  "description": "Analyze your job qualification and get resume optimization tips using AI. Connect your LinkedIn, upload your resume, and paste a job link for a deep-dive match analysis.",
+  "requestFramePermissions": []
+}
