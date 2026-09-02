@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <string>ProblemFramer</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.problemframer.app</string>
+    <key>CFBundleName</key>
+    <string>ProblemFramer</string>
+    <key>CFBundleDisplayName</key>
+    <string>ProblemFramer</string>
+    <key>CFBundleVersion</key>
+    <string>1.0</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>14.0</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.productivity</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>ProblemFramer uses your microphone to let you dictate problem descriptions instead of typing.</string>
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>ProblemFramer uses speech recognition to turn your dictation into text.</string>
+</dict>
+</plist>
