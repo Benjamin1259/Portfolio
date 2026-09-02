@@ -60,6 +60,25 @@ You'll need a Gemini API key (free at aistudio.google.com/apikey) — paste it
 into the app's Settings after first launch. It's stored in a local file on
 your Mac, not in the macOS Keychain.
 
+BUILDING A SHAREABLE INSTALLER (.dmg)
+--------------------------------------
+To hand the app directly to someone else (rather than them building it from
+source):
+
+    ./build_installer.sh
+
+This produces ProblemFramer.dmg — open it and drag ProblemFramer.app into
+the Applications shortcut inside, same as any normal Mac app installer.
+
+Caveat: this is signed with the same local, self-signed development
+certificate as the dev build above — not a real Apple Developer ID. It is
+NOT notarized by Apple. On first launch, macOS Gatekeeper will refuse a
+normal double-click ("unidentified developer"); the person needs to
+right-click the app and choose "Open" instead, once. After that it opens
+normally. This is fine for sharing with people directly, but a real
+Developer ID account ($99/year) would be needed to distribute it more
+broadly without that warning.
+
 REQUIREMENTS
 ------------
 - macOS 14+
