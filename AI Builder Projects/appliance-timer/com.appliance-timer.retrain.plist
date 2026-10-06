@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Appliance Timer: daily retrain at 2:15pm (after CAISO publishes the next day's prices around 1pm Pacific).
+  If the Mac is asleep at 2:15pm, launchd runs it when the Mac wakes.
+
+  Install:  cp com.appliance-timer.retrain.plist ~/Library/LaunchAgents/
+            launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.appliance-timer.retrain.plist
+  Run now:  launchctl kickstart gui/$(id -u)/com.appliance-timer.retrain
+  Remove:   launchctl bootout gui/$(id -u)/com.appliance-timer.retrain
+            rm ~/Library/LaunchAgents/com.appliance-timer.retrain.plist
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.appliance-timer.retrain</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Library/Frameworks/Python.framework/Versions/3.14/bin/python3</string>
+    <string>-u</string>
+    <string>/Users/deltaflyer/Documents/appliance-scheduler/retrain.py</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>14</integer>
+    <key>Minute</key>
+    <integer>15</integer>
+  </dict>
+  <key>StandardOutPath</key>
+  <string>/Users/deltaflyer/Library/Logs/appliance-timer-retrain.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/deltaflyer/Library/Logs/appliance-timer-retrain.log</string>
+  <key>ProcessType</key>
+  <string>Background</string>
+  <key>LowPriorityIO</key>
+  <true/>
+</dict>
+</plist>

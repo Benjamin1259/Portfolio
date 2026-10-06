@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "Appliance Timer",
+  "version": "0.9.1",
+  "description": "Best time to run appliances in San Francisco, estimated from the weather forecast and grid price patterns.",
+  "action": {
+    "default_title": "Appliance Timer",
+    "default_icon": {
+      "16": "icons/16.png",
+      "32": "icons/32.png",
+      "48": "icons/48.png",
+      "128": "icons/128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/16.png",
+    "32": "icons/32.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": [
+    "alarms",
+    "storage",
+    "sidePanel",
+    "nativeMessaging"
+  ],
+  "host_permissions": [
+    "https://api.open-meteo.com/*",
+    "https://www.cloudflare.com/*",
+    "https://data.energystar.gov/*",
+    "https://www.fueleconomy.gov/*"
+  ],
+  "side_panel": {
+    "default_path": "popup.html"
+  },
+  "minimum_chrome_version": "116"
+}

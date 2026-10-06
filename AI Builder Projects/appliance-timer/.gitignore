@@ -1,0 +1,9 @@
+# Rebuilt locally: pipeline.py downloads and cleans the data; retrain.py saves the current model
+data/raw/
+data/clean/
+data/model/
+# Built by macapp/build.sh
+macapp/build/
+__pycache__/
+*.tmp
+.DS_Store

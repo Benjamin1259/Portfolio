@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Appliance Timer</title>
+<link rel="stylesheet" href="popup.css">
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>Appliance Timer</h1>
+      <div class="timesrc">
+        <label for="timesrc">Time source</label>
+        <select id="timesrc">
+          <option value="network">Network (default)</option>
+          <option value="device">This computer</option>
+        </select>
+      </div>
+      <p class="sub" id="model-age"></p>
+    </div>
+    <div class="datepick">
+      <button id="prev" aria-label="Previous day">‹</button>
+      <input type="date" id="date" aria-label="Date">
+      <button id="next" aria-label="Next day">›</button>
+    </div>
+  </header>
+
+  <section class="card">
+    <p class="date" id="when">Loading…</p>
+    <p class="verdict" id="verdict"></p>
+    <p class="together" id="together"></p>
+    <div id="day-cal"></div>
+    <div class="apps" id="apps"></div>
+  </section>
+
+  <section class="card" id="week">
+    <h2>Next 7 days</h2>
+    <p class="week-sum" id="week-sum">Loading…</p>
+    <div class="week-bars" id="week-bars" role="list"></div>
+  </section>
+
+  <section class="card">
+    <h2><span class="h2-day" id="chart-day"></span><span id="chart-kind">Predicted</span> cost to run, by start time</h2>
+    <div class="chips" id="chips" role="tablist" aria-label="Appliance"></div>
+    <p class="chart-sub" id="chart-sub"></p>
+    <div class="chart" id="chart"></div>
+    <div class="legend">
+      <span><i class="k best"></i>Cheapest 3 start times</span>
+      <span><i class="k"></i>Other start times</span>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Weather behind it</h2>
+    <div class="wx" id="wx"></div>
+    <div class="source" id="source"></div>
+  </section>
+
+  <details class="card editor" id="editor" open>
+    <summary><h2>My appliances</h2><span class="count" id="count"></span></summary>
+    <p class="hint">Add an appliance by its brand and model number to look up its energy per run. You can edit any value; run time is rounded to whole hours.</p>
+    <div class="rows" id="rows"></div>
+    <form class="add" id="add">
+      <input id="query" type="search" placeholder="Add: brand and model number" aria-label="Appliance brand and model number" autocomplete="off">
+      <button type="submit" id="lookup">Look up</button>
+    </form>
+    <div class="results" id="results" aria-live="polite"></div>
+    <div class="add-foot"><button id="reset" class="link" type="button">Reset to defaults</button></div>
+  </details>
+
+  <section class="card" id="alerts" hidden>
+    <h2>Alerts</h2>
+    <label class="toggle"><input type="checkbox" id="alert-start"> Notify me when it's time to start each appliance</label>
+    <p class="hint" id="alert-note">A macOS notification at each appliance's cheapest start time, today and tomorrow.</p>
+  </section>
+
+  <p class="foot" id="foot"></p>
+</main>
+<script type="module" src="popup.js"></script>
+</body>
+</html>
